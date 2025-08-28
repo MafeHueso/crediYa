@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Builder
-public class UserDTO{
+public class SaveUserDTO {
     private Long id;
     @NotNull
     @NotBlank(message = "Field firstname cannot be null or empty")

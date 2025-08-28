@@ -9,5 +9,8 @@ dependencies {
     testImplementation 'org.reactivecommons.utils:object-mapper:0.1.0'
     implementation "org.mapstruct:mapstruct:1.5.5.Final"
     annotationProcessor "org.mapstruct:mapstruct-processor:1.5.5.Final"
+    implementation project(':usecase')
+    testImplementation 'org.mockito:mockito-core'  // O la versión más reciente
+    testImplementation 'org.mockito:mockito-junit-jupiter'  // Si estás usando JUnit 5
 }
 

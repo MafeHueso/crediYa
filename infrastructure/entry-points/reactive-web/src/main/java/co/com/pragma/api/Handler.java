@@ -1,41 +1,74 @@
 package co.com.pragma.api;
 
-import co.com.pragma.api.dto.RegisterUserDTO;
+import co.com.pragma.api.dto.SaveUserDTO;
 import co.com.pragma.api.mapper.UserDTOMapper;
 import co.com.pragma.model.user.User;
 import co.com.pragma.usecase.user.UserUseCase;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class Handler {
 
     private final UserUseCase userUseCase;
     private final UserDTOMapper userDTOMapper;
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(RegisterUserDTO.class)
-                .map(userDTOMapper::toModel) // Convertir DTO → Modelo
-                .flatMap(userUseCase::saveUser) // Guardar el modelo
-                .map(userDTOMapper::toResponse) // Convertir Modelo → DTO
+        log.info("[Handler] Received request to save user");
+        return serverRequest.bodyToMono(SaveUserDTO.class)
+                .doOnNext(dto -> log.debug("[Handler] Request body: {}", dto))
+                .flatMap(dto -> {
+                    var violations = validator.validate(dto);
+                    if (!violations.isEmpty()) {
+                        log.warn("[Handler] Validation failed: {}", violations);
+                        return Mono.error(new ConstraintViolationException(violations));
+                    }
+
+                    User user = userDTOMapper.toModel(dto);
+                    return userUseCase.saveUser(user)
+                            .doOnSuccess(savedUser -> log.info("[Handler] User saved successfully: {}", savedUser))
+                            .map(userDTOMapper::toResponse);
+                })
                 .flatMap(userDTO -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(userDTO));
+                        .bodyValue(userDTO))
+                .onErrorResume(ConstraintViolationException.class, ex -> {
+                    var errors = ex.getConstraintViolations()
+                            .stream()
+                            .map(ConstraintViolation::getMessage)
+                            .toList();
+                    log.warn("[Handler] Responding with validation errors: {}", errors);
+                    return ServerResponse.badRequest()
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(Map.of("errors", errors));
+                })
+                .doOnError(e -> log.error("[Handler] Unexpected error", e));
     }
 
     public Mono<ServerResponse> listenFindByEmail(ServerRequest serverRequest) {
         String email = serverRequest.pathVariable("email");
+        log.info("[Handler] Received request to find user by email: {}", email);
         return userUseCase.findByEmail(email)
                 .map(userDTOMapper::toResponse)
                 .flatMap(userDTO -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(userDTO))
-                .switchIfEmpty(ServerResponse.notFound().build());
+                .switchIfEmpty(ServerResponse.notFound().build())
+                .doOnError(e -> log.error("[Handler] Error finding user by email", e));
     }
 
 
