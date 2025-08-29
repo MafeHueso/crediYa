@@ -16,13 +16,10 @@ public class UserUseCase {
     }
 
     public Mono<User> saveUser(User user) {
+
         return userRepository.findByEmail(user.email())
-                .flatMap(existingUser -> {
-                    if (existingUser != null) {
-                        return Mono.error(new EmailAlreadyExistsException("Email already registered"));
-                    }
-                    return userRepository.saveUser(user);
-                });
+                .flatMap(existingUser -> Mono.<User>error(new EmailAlreadyExistsException("Email already registered")))
+                .switchIfEmpty(userRepository.saveUser(user));
     }
 
     public Mono<User> findByEmail(String email) {

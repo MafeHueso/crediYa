@@ -3,6 +3,7 @@ package co.com.pragma.api;
 import co.com.pragma.api.dto.SaveUserDTO;
 import co.com.pragma.api.mapper.UserDTOMapper;
 import co.com.pragma.model.user.User;
+import co.com.pragma.model.user.exception.EmailAlreadyExistsException;
 import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -10,6 +11,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -41,11 +43,19 @@ public class Handler {
                     User user = userDTOMapper.toModel(dto);
                     return userUseCase.saveUser(user)
                             .doOnSuccess(savedUser -> log.info("[Handler] User saved successfully: {}", savedUser))
-                            .map(userDTOMapper::toResponse);
+                            .map(userSaved -> userDTOMapper.toResponse(userSaved));
                 })
                 .flatMap(userDTO -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(userDTO))
+                .onErrorResume(EmailAlreadyExistsException.class, ex -> {
+                    return ServerResponse.status(HttpStatus.CONFLICT)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(Map.of(
+                                    "error", "409",
+                                    "message", ex.getMessage()
+                            ));
+                })
                 .onErrorResume(ConstraintViolationException.class, ex -> {
                     var errors = ex.getConstraintViolations()
                             .stream()
