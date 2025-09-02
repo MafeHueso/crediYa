@@ -12,8 +12,8 @@ import lombok.*;
 @Builder
 public class LoanApplicationRequestDTO {
     @NotNull
-    @NotBlank(message = "Field identification number cannot be null or empty")
-    private String identificationNumber;
+    @NotBlank(message = "Field email cannot be null or empty")
+    private String email;
     @NotNull
     @NotBlank(message = "Field amount cannot be null or empty")
     private BigDecimal amount;

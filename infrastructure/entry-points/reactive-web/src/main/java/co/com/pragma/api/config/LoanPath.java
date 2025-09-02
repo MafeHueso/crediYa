@@ -10,5 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class LoanPath {
     private String createLoan;
     private String findByTypeLoan;
+    private String findByIdentificationAndLoanType;
 
 }

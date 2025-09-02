@@ -7,7 +7,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 
-@Table("loan_applications")
+@Table("loan_type")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -18,6 +18,7 @@ public class LoanTypeEntity {
     @Id
     @Column(name = "loan_type_id")
     private Long loanTypeId;
+
     @Column(name ="loan_name")
     private String loanName;
     @Column(name ="max_amount")

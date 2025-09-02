@@ -32,5 +32,11 @@ routes:
   paths:
     createLoan: "/api/v1/application"
     findByTypeLoan: "/api/v1/application/{loanTypeId}"
+    findByIdentificationAndLoanType: "/api/v1/application/{identification}/{loanTypeId}"
+
+config:
+  base:
+    endpoint:
+      client: http://localhost:8081
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"

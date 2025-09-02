@@ -7,6 +7,7 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface LoanTypeEntityMapper {
 
-     LoanTypeEntity toEntity(String loanType);
+     LoanTypeEntity toEntity(LoanType loanType);
      LoanType toModel(LoanTypeEntity entity);
+     LoanTypeEntity toEntityFromId(Long loanTypeId);
 }
