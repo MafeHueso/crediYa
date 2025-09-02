@@ -7,6 +7,8 @@ import co.com.pragma.model.user.exception.EmailNotFoundException;
 import co.com.pragma.model.user.gateways.UserRepository;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
+
 public class UserUseCase {
     private final UserRepository userRepository;
 
@@ -16,6 +18,16 @@ public class UserUseCase {
     }
 
     public Mono<User> saveUser(User user) {
+        if(user.firstName() == null || user.firstName().isBlank()
+                || user.lastName() == null || user.lastName().isBlank()
+                ||user.email() == null || user.email().isBlank()
+                || user.salaryBase() == null){
+            return Mono.error(new IllegalArgumentException("Required fields cannot be null or empty"));
+        }
+        if(user.salaryBase().compareTo(BigDecimal.ZERO) <= 0
+                || user.salaryBase().compareTo(BigDecimal.valueOf(15000000)) > 0){
+            return Mono.error(new IllegalArgumentException("Base salary must be greater than 0 and less than or equal to 15,000,000."));
+        }
 
         return userRepository.findByEmail(user.email())
                 .flatMap(existingUser -> Mono.<User>error(new EmailAlreadyExistsException("Email already registered")))

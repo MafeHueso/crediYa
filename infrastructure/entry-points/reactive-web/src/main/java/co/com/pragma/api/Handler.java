@@ -4,6 +4,7 @@ import co.com.pragma.api.dto.SaveUserDTO;
 import co.com.pragma.api.mapper.UserDTOMapper;
 import co.com.pragma.model.user.User;
 import co.com.pragma.model.user.exception.EmailAlreadyExistsException;
+import co.com.pragma.model.user.exception.EmailNotFoundException;
 import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -18,6 +19,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.Map;
 
 @Slf4j
@@ -51,9 +53,7 @@ public class Handler {
                 .onErrorResume(EmailAlreadyExistsException.class, ex -> {
                     return ServerResponse.status(HttpStatus.CONFLICT)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(Map.of(
-                                    "error", "409",
-                                    "message", ex.getMessage()
+                            .bodyValue(Map.of("message", ex.getMessage()
                             ));
                 })
                 .onErrorResume(ConstraintViolationException.class, ex -> {
@@ -77,7 +77,8 @@ public class Handler {
                 .flatMap(userDTO -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(userDTO))
-                .switchIfEmpty(ServerResponse.notFound().build())
+                .onErrorResume(EmailNotFoundException.class, error -> ServerResponse.status(HttpStatus.NOT_FOUND)
+                .bodyValue(Collections.singletonMap("error", error.getMessage())))
                 .doOnError(e -> log.error("[Handler] Error finding user by email", e));
     }
 
