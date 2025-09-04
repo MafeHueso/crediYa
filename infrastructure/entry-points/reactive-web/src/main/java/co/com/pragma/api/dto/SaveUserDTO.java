@@ -25,7 +25,7 @@ public class SaveUserDTO {
     private String email;
     private Long identificationNumber;
     private String phoneNumber;
-    private Integer roleId;
+    private String roleId;
     @NotNull(message = "Field salary cannot be null")
     @DecimalMin(value = "0.0", inclusive = true, message = "Salary must be greater than or equal to 0")
     @DecimalMax(value = "15000000.0", inclusive = true, message = "Salary must be less than or equal to 15,000,000")

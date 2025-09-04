@@ -1,4 +1,4 @@
-package co.com.pragma.r2dbc;
+package co.com.pragma.r2dbc.gateway;
 
 import co.com.pragma.r2dbc.entity.UserEntity;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
@@ -9,5 +9,6 @@ import reactor.core.publisher.Mono;
 public interface UserReactiveRepository extends ReactiveCrudRepository<UserEntity, Long>, ReactiveQueryByExampleExecutor<UserEntity> {
 
     Mono<UserEntity> findByEmail(String email);
+
 
 }

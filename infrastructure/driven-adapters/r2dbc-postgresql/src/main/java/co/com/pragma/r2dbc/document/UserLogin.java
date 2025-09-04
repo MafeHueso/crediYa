@@ -1,25 +1,25 @@
-package co.com.pragma.r2dbc.entity;
+/*package co.com.pragma.r2dbc.document;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
-import lombok.*;
 import org.springframework.data.relational.core.mapping.Table;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-@Table("user_login")
+@Table(name = "user_login")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Builder
-public class UserEntity implements UserDetails {
+public class UserLogin implements UserDetails {
     @Id
     @Column(name="user_id")
     private Long userId;
@@ -105,4 +105,4 @@ public class UserEntity implements UserDetails {
                 '}';
     }
 }
-
+*/

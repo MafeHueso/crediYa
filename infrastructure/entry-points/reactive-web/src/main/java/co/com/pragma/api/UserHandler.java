@@ -1,4 +1,4 @@
-package co.com.pragma.api;
+/*package co.com.pragma.api;
 
 import co.com.pragma.api.dto.SaveUserDTO;
 import co.com.pragma.api.mapper.UserDTOMapper;
@@ -25,11 +25,13 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class Handler {
+public class UserHandler {
 
     private final UserUseCase userUseCase;
     private final UserDTOMapper userDTOMapper;
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
+
 
     public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
         log.info("[Handler] Received request to save user");
@@ -84,3 +86,4 @@ public class Handler {
 
 
 }
+*/

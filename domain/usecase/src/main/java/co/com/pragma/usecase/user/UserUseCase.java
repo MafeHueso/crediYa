@@ -17,7 +17,7 @@ public class UserUseCase {
         this.userRepository = userRepository;
     }
 
-    public Mono<User> saveUser(User user) {
+    public Mono<User> signUp(User user) {
         if(user.firstName() == null || user.firstName().isBlank()
                 || user.lastName() == null || user.lastName().isBlank()
                 ||user.email() == null || user.email().isBlank()
@@ -31,7 +31,7 @@ public class UserUseCase {
 
         return userRepository.findByEmail(user.email())
                 .flatMap(existingUser -> Mono.<User>error(new EmailAlreadyExistsException("Email already registered")))
-                .switchIfEmpty(userRepository.saveUser(user));
+                .switchIfEmpty(userRepository.signUp(user));
     }
 
     public Mono<User> findByEmail(String email) {
@@ -39,6 +39,15 @@ public class UserUseCase {
         return userRepository.findByEmail(email)
                 .switchIfEmpty(Mono.error(new EmailNotFoundException("Unregistered email")));
     }
+
+ /*
+    public Mono<User> signUp(User user) {
+
+        return userRepository.signUp(user);
+
+    }*/
+
+
 }
 
 

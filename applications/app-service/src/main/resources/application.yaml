@@ -23,6 +23,7 @@ routes:
     paths:
       users: "/api/v1/users"
       usersByEmail: "/api/v1/users/{email}"
+      login: "/api/v1/login"
 management:
   endpoints:
     web:
@@ -32,6 +33,9 @@ management:
     health:
       probes:
         enabled: true
+jwt:
+  secret: "4v+9du6Vl3qZrYfLJe6A2P2QYb3B8FgcpzNEkZw1ySA="
+  expiration: 360000
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 springdoc:

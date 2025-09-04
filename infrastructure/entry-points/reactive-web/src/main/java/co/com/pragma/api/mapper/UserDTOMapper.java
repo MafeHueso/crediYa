@@ -9,7 +9,7 @@ import org.mapstruct.Mapper;
 public interface UserDTOMapper {
 
     UserDTO toResponse(User user);
-    User toModel(SaveUserDTO saveUserDTO);
+    User toModel(UserDTO userDTO);
 
 
 }

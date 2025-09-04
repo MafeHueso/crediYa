@@ -6,13 +6,15 @@ import java.time.LocalDate;
 
 public record User (
 
-        Long id,
+        Long userId,
         String firstName,
         String lastName,
         String email,
         Long identificationNumber,
         String phoneNumber,
-        Integer roleId,
+        String roleId,
         BigDecimal salaryBase,
-        LocalDate dateBirthday
+        LocalDate dateBirthday,
+        String password,
+        Boolean status
 ){}

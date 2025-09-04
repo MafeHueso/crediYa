@@ -1,8 +1,9 @@
-package co.com.pragma.r2dbc;
+/*package co.com.pragma.r2dbc.adapter;
 
 import co.com.pragma.model.user.User;
 import co.com.pragma.model.user.gateways.UserRepository;
 import co.com.pragma.r2dbc.entity.UserEntity;
+import co.com.pragma.r2dbc.gateway.UserReactiveRepository;
 import co.com.pragma.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.pragma.r2dbc.mapper.UserEntityMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -56,4 +57,6 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
                     .doOnError(error -> log.error("[findByEmail] Error finding user by email", error))
                     .map(mapper::toModel);
     }
+
 }
+*/
