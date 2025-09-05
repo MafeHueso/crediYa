@@ -34,6 +34,10 @@ routes:
     findByTypeLoan: "/api/v1/application/{loanTypeId}"
     findByIdentificationAndLoanType: "/api/v1/application/{identification}/{loanTypeId}"
 
+jwt:
+  secret: "4v+9du6Vl3qZrYfLJe6A2P2QYb3B8FgcpzNEkZw1ySA="
+  expiration: 360000
+
 config:
   base:
     endpoint:

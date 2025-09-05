@@ -1,4 +1,4 @@
-package co.com.pragma.r2dbc;
+package co.com.pragma.r2dbc.client;
 
 import lombok.*;
 

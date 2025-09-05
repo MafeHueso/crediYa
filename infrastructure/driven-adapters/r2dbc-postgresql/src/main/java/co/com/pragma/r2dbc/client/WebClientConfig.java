@@ -1,4 +1,4 @@
-package co.com.pragma.r2dbc.config;
+package co.com.pragma.r2dbc.client;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
