@@ -1,12 +1,12 @@
 package co.com.pragma.r2dbc.security.config;
 
 import co.com.pragma.r2dbc.security.repository.SecurityContextRepository;
-import co.com.pragma.r2dbc.security.jwt.JwtFilter;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,18 +30,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityWebFilterChain filterChain(ServerHttpSecurity http, JwtFilter jwtFilter) {
+    public SecurityWebFilterChain filterChain(ServerHttpSecurity http) {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange(exchangeSpec -> exchangeSpec
-                        .pathMatchers( "/api/v1/login/login", "/api/v1/login/signup").permitAll()
-                        //.pathMatchers("/api/v1/login/signup").hasRole("ADMIN")
-                        .anyExchange().authenticated())
-                .addFilterAfter(jwtFilter, SecurityWebFiltersOrder.FIRST)
+                .authorizeExchange(exchange -> exchange
+                        .pathMatchers(HttpMethod.POST, "/api/v1/login").permitAll()
+                        .pathMatchers("/api/v1/signUp").hasRole("ADMIN")
+                        .anyExchange().authenticated()
+                )
                 .securityContextRepository(securityContextRepository)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .build();
     }
+
 }

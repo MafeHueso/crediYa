@@ -6,9 +6,11 @@ import co.com.pragma.model.user.exception.EmailNotFoundException;
 import co.com.pragma.model.user.gateways.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -17,76 +19,115 @@ import java.time.LocalDate;
 
 import static org.mockito.Mockito.*;
 
-public class UserUseCaseTest {
+@ExtendWith(MockitoExtension.class)
+class UserUseCaseTest {
     @Mock
     private UserRepository userRepository;
 
     @InjectMocks
     private UserUseCase userUseCase;
 
-    private User user;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        user = new User(1L, "Martina", "Sanchez", "marta123@gmail.com", null, null, 1, new BigDecimal("50000.00"), LocalDate.of(2000, 8, 1));
-    }
-
-
-    @Test
-    void saveUser_EmailAlreadyExists() {
-        // Simulamos que el correo ya existe
-        when(userRepository.findByEmail(user.email())).thenReturn(Mono.just(user));
-
-        // Llamamos al caso de uso
-        StepVerifier.create(userUseCase.saveUser(user))
-                .expectError(EmailAlreadyExistsException.class)
-                .verify();
-
-        verify(userRepository, times(1)).findByEmail(user.email());
-        verify(userRepository, never()).saveUser(user);
-    }
+    private final User validUser = new User(
+            null,
+            "John",
+            "Doe",
+            "john.doe@example.com",
+            1032578L,
+            "313310311",
+            "ADMIN",
+            new BigDecimal(9800000),
+            null,
+            "password123",
+            true
+    );
 
     @Test
-    void saveUser_Success() {
-        // Simulamos que el correo no existe
-        when(userRepository.findByEmail(user.email())).thenReturn(Mono.empty());
-        when(userRepository.saveUser(user)).thenReturn(Mono.just(user));
+    void shouldSignUpSuccessfully() {
+        // Mock: no existe usuario
+        when(userRepository.findByEmail(validUser.email())).thenReturn(Mono.empty());
+        when(userRepository.signUp(validUser)).thenReturn(Mono.just(validUser));
 
-        // Llamamos al caso de uso
-        StepVerifier.create(userUseCase.saveUser(user))
-                .expectNext(user)  // Verifica que el usuario fue guardado correctamente
+        StepVerifier.create(userUseCase.signUp(validUser))
+                .expectNext(validUser)
                 .verifyComplete();
 
-        verify(userRepository, times(1)).findByEmail(user.email());
-        verify(userRepository, times(1)).saveUser(user);
+        verify(userRepository).findByEmail(validUser.email());
+        verify(userRepository).signUp(validUser);
     }
 
     @Test
-    void findByEmail_UserNotFound() {
-        // Simulamos que no existe el correo
-        String email = "nonexistent@example.com";
-        when(userRepository.findByEmail(email)).thenReturn(Mono.empty());
+    void shouldThrowErrorWhenFieldsAreMissing() {
+        User invalidUser = new User(null, null, " ", null, null,
+                "313310311", "ADMIN", null, null, "password123", true);
 
-        // Llamamos al caso de uso
-        StepVerifier.create(userUseCase.findByEmail(email))
-                .expectError(EmailNotFoundException.class)
+        StepVerifier.create(userUseCase.signUp(invalidUser))
+                .expectErrorMatches(ex -> ex instanceof IllegalArgumentException &&
+                        ex.getMessage().contains("Required fields cannot be null"))
                 .verify();
-
-        verify(userRepository, times(1)).findByEmail(email);
     }
 
     @Test
-    void findByEmail_UserFound() {
-        // Simulamos que el correo ya existe
+    void shouldThrowErrorWhenSalaryIsOutOfRange() {
+        User tooHighSalaryUser = new User(
+                null,
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                1032578L,
+                "313310311",
+                "ADMIN",
+                new BigDecimal(258000000),
+                null,
+                "password123",
+                true  // fuera del rango permitido
+        );
+
+        StepVerifier.create(userUseCase.signUp(tooHighSalaryUser))
+                .expectErrorMatches(ex -> ex instanceof IllegalArgumentException &&
+                        ex.getMessage().contains("Base salary must be greater than 0"))
+                .verify();
+    }
+
+    @Test
+    void shouldThrowErrorWhenEmailAlreadyExists() {
+        User user = new User(
+                null,
+                "John",
+                "Doe",
+                "john.doe@example.com",
+                1032578L,
+                "313310311",
+                "ADMIN",
+                new BigDecimal(20000),
+                null,
+                "password123",
+                true );
+
+        // Simular que ya existe usuario con ese email
         when(userRepository.findByEmail(user.email())).thenReturn(Mono.just(user));
 
-        // Llamamos al caso de uso
-        StepVerifier.create(userUseCase.findByEmail(user.email()))
-                .expectNext(user)
-                .verifyComplete();
-
-        verify(userRepository, times(1)).findByEmail(user.email());
+        StepVerifier.create(userUseCase.signUp(user))
+                .expectErrorMatches(ex -> ex instanceof EmailAlreadyExistsException &&
+                        ex.getMessage().equals("Email already registered"))
+                .verify();
     }
 
+    @Test
+    void shouldReturnUserWhenEmailExists() {
+        when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Mono.just(validUser));
+
+        StepVerifier.create(userUseCase.findByEmail("john.doe@example.com"))
+                .expectNext(validUser)
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldThrowErrorWhenEmailNotFound() {
+        when(userRepository.findByEmail("notfound@example.com")).thenReturn(Mono.empty());
+
+        StepVerifier.create(userUseCase.findByEmail("notfound@example.com"))
+                .expectErrorMatches(ex -> ex instanceof EmailNotFoundException &&
+                        ex.getMessage().contains("Unregistered email"))
+                .verify();
+    }
 }

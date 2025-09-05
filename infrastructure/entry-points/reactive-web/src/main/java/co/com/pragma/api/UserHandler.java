@@ -1,15 +1,21 @@
-/*package co.com.pragma.api;
+package co.com.pragma.api;
 
-import co.com.pragma.api.dto.SaveUserDTO;
+
+import co.com.pragma.api.dto.UserDTO;
+import co.com.pragma.api.error.InvalidRolRequestException;
 import co.com.pragma.api.mapper.UserDTOMapper;
 import co.com.pragma.model.user.User;
+import co.com.pragma.model.user.dto.LogInDTO;
+import co.com.pragma.model.user.dto.TokenDTO;
+import co.com.pragma.model.user.exception.BadCredentialsException;
 import co.com.pragma.model.user.exception.EmailAlreadyExistsException;
 import co.com.pragma.model.user.exception.EmailNotFoundException;
+import co.com.pragma.usecase.user.LogInUseCase;
 import co.com.pragma.usecase.user.UserUseCase;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,64 +32,84 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class UserHandler {
-
     private final UserUseCase userUseCase;
+    private final LogInUseCase logInUseCase;
     private final UserDTOMapper userDTOMapper;
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
+    public Mono<ServerResponse> signUp(ServerRequest request) {
+        String roleId = request.exchange().getAttribute("roleId");
 
+        if (roleId == null || !"ADMIN".equalsIgnoreCase(roleId)) {
+            return ServerResponse.status(HttpStatus.FORBIDDEN)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(Mono.error(new InvalidRolRequestException("Only ADMIN users can create new user accounts.")));
+        }
 
-    public Mono<ServerResponse> listenSaveUser(ServerRequest serverRequest) {
-        log.info("[Handler] Received request to save user");
-        return serverRequest.bodyToMono(SaveUserDTO.class)
-                .doOnNext(dto -> log.debug("[Handler] Request body: {}", dto))
-                .flatMap(dto -> {
-                    var violations = validator.validate(dto);
+        return request.bodyToMono(UserDTO.class)
+                .flatMap(userDTO -> {
+                    var violations = validator.validate(userDTO);
                     if (!violations.isEmpty()) {
-                        log.warn("[Handler] Validation failed: {}", violations);
                         return Mono.error(new ConstraintViolationException(violations));
                     }
 
-                    User user = userDTOMapper.toModel(dto);
-                    return userUseCase.saveUser(user)
-                            .doOnSuccess(savedUser -> log.info("[Handler] User saved successfully: {}", savedUser))
+                    User user = userDTOMapper.toModel(userDTO);
+                    return userUseCase.signUp(user)
                             .map(userSaved -> userDTOMapper.toResponse(userSaved));
                 })
-                .flatMap(userDTO -> ServerResponse.ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(userDTO))
-                .onErrorResume(EmailAlreadyExistsException.class, ex -> {
-                    return ServerResponse.status(HttpStatus.CONFLICT)
+                .flatMap(userSaved -> {
+                    String message = "Successful registration for user " + userSaved.getEmail();
+                    Map<String, String> response = Map.of("message", message);
+                    return ServerResponse.ok()
                             .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(Map.of("message", ex.getMessage()
-                            ));
+                            .bodyValue(response);
                 })
+                .onErrorResume(EmailAlreadyExistsException.class, ex ->
+                        ServerResponse.status(HttpStatus.CONFLICT)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(Map.of("message", ex.getMessage()))
+                )
                 .onErrorResume(ConstraintViolationException.class, ex -> {
                     var errors = ex.getConstraintViolations()
                             .stream()
                             .map(ConstraintViolation::getMessage)
                             .toList();
-                    log.warn("[Handler] Responding with validation errors: {}", errors);
+
                     return ServerResponse.badRequest()
                             .contentType(MediaType.APPLICATION_JSON)
                             .bodyValue(Map.of("errors", errors));
-                })
-                .doOnError(e -> log.error("[Handler] Unexpected error", e));
+                });
     }
 
-    public Mono<ServerResponse> listenFindByEmail(ServerRequest serverRequest) {
+
+    public Mono<ServerResponse> logIn(ServerRequest request) {
+
+        return request.bodyToMono(LogInDTO.class)
+                .flatMap(dto ->
+                        logInUseCase.login(dto)
+                                .flatMap(tokenDTO -> ServerResponse.ok()
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .bodyValue(tokenDTO))
+                )
+                .onErrorResume(BadCredentialsException.class, ex ->
+                        ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(Map.of("message", ex.getMessage()))
+                );
+    }
+
+    public Mono<ServerResponse> findByEmail(ServerRequest serverRequest) {
         String email = serverRequest.pathVariable("email");
-        log.info("[Handler] Received request to find user by email: {}", email);
+
         return userUseCase.findByEmail(email)
-                .map(userDTOMapper::toResponse)
-                .flatMap(userDTO -> ServerResponse.ok()
+                .map(userDTOMapper::toDomain)
+                .flatMap(dto -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(userDTO))
+                        .bodyValue(dto))
                 .onErrorResume(EmailNotFoundException.class, error -> ServerResponse.status(HttpStatus.NOT_FOUND)
-                .bodyValue(Collections.singletonMap("error", error.getMessage())))
+                        .bodyValue(Collections.singletonMap("error", error.getMessage())))
                 .doOnError(e -> log.error("[Handler] Error finding user by email", e));
     }
 
 
 }
-*/

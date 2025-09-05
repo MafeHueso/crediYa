@@ -2,17 +2,21 @@ package co.com.pragma.r2dbc.security.jwt;
 
 
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+@Slf4j
 @Component
 public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
 
@@ -25,9 +29,8 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
         String token = authentication.getCredentials() == null ? "" : authentication.getCredentials().toString();
-
+        log.info("Token enviado al login service: {}", token);
         if (token.isEmpty()) {
-            // No hay token: no autenticamos, dejamos que siga la cadena sin error
             return Mono.empty();
         }
 
@@ -39,7 +42,7 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
                         List<SimpleGrantedAuthority> authorities = Stream.of(claims.get("roleId"))
                                 .map(role -> (List<Map<String, String>>) role)
                                 .flatMap(roleList -> roleList.stream()
-                                        .map(r -> r.get("authority"))
+                                        .map(r -> "ROLE_" + r.get("authority"))
                                         .map(SimpleGrantedAuthority::new))
                                 .toList();
 
@@ -52,7 +55,7 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
                         return Mono.just(auth);
 
                     } catch (Exception e) {
-                        return Mono.error(new RuntimeException("bad token"));
+                        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad token");
                     }
                 });
     }

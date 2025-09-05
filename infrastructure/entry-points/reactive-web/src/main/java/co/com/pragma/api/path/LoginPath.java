@@ -9,4 +9,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "routes.paths")
 public class LoginPath {
     private String login;
+    private String signUp;
+    private String usersByEmail;
 }

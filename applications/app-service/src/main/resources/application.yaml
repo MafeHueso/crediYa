@@ -21,9 +21,9 @@ adapters:
     password: "1234"
 routes:
     paths:
-      users: "/api/v1/users"
-      usersByEmail: "/api/v1/users/{email}"
+      signUp: "/api/v1/signUp"
       login: "/api/v1/login"
+      usersByEmail: "/api/v1/login/{email}"
 management:
   endpoints:
     web:

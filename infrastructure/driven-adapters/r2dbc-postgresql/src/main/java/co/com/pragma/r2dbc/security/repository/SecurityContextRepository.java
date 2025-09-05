@@ -1,6 +1,7 @@
 package co.com.pragma.r2dbc.security.repository;
 
 import co.com.pragma.r2dbc.security.jwt.JwtAuthenticationManager;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
@@ -25,8 +26,16 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
 
     @Override
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
-        String token = exchange.getAttribute("token");
-        return jwtAuthenticationManager.authenticate(new UsernamePasswordAuthenticationToken(token, token))
+        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Mono.empty();
+        }
+
+        String token = authHeader.substring(7);
+
+        return jwtAuthenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(token, token))
                 .map(SecurityContextImpl::new);
     }
 }
