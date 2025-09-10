@@ -32,33 +32,28 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .setSubject(email)
-                .claim("roleId", roles)  // guardamos lista simple de strings
+                .claim("roleId", roles)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(key)
                 .compact();
     }
 
-    // Extrae email (subject) del token
     public String getEmailFromToken(String token) {
         Claims claims = getClaims(token);
         return claims.getSubject();
     }
 
-    // Extrae roleId del token
-    @SuppressWarnings("unchecked")
-    public List<String> getRoleIdFromToken(String token) {
+   public List<String> getRoleIdFromToken(String token) {
         Claims claims = getClaims(token);
         return claims.get("roleId", List.class);
     }
 
-    // Valida token y devuelve true si es válido
-    public boolean validateToken(String token) {
+   public boolean validateToken(String token) {
         try {
             getClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            // Aquí puedes loggear el error si quieres
             return false;
         }
     }
@@ -80,11 +75,10 @@ public class JwtProvider {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
-        return List.of();  // o extraer según cómo guardes los roles
+        return List.of();
     }
 
-    // Obtiene claims del token, lanza excepción si no válido
-    public Claims getClaims(String token) {
+   public Claims getClaims(String token) {
         SecretKey key = getKey(secret);
         return Jwts.parser()
                 .verifyWith(key)

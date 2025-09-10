@@ -6,5 +6,7 @@ import reactor.core.publisher.Mono;
 public interface UserClientRepository {
     Mono<String> getIdentificationByEmail(String email);
 
+  //  Mono<UserClientDetails>  getUserByIdentification(String identificationNumber);
+
 
 }

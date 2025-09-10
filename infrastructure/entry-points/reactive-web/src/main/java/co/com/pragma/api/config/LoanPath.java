@@ -11,5 +11,6 @@ public class LoanPath {
     private String createLoan;
     private String findByTypeLoan;
     private String findByIdentificationAndLoanType;
+    private String pendingLoans;
 
 }

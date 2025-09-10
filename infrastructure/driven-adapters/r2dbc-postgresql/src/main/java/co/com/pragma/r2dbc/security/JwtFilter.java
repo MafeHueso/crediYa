@@ -38,11 +38,9 @@ public class JwtFilter implements WebFilter {
         List<String> roleIds = jwtProvider.getRoles(token);
         String roleId = roleIds.isEmpty() ? "" : roleIds.get(0);
 
-        // Guardamos info en attributes para que esté disponible en el handler
         exchange.getAttributes().put("email", email);
         exchange.getAttributes().put("roleId", roleId);
 
-        // Continúa el filtro y la cadena de ejecución
         return chain.filter(exchange);
     }
 

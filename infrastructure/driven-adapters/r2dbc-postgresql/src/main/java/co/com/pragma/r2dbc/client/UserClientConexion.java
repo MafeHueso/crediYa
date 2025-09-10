@@ -1,8 +1,10 @@
 package co.com.pragma.r2dbc.client;
 
+import co.com.pragma.model.client.UserClientDetails;
 import co.com.pragma.model.client.UserClientRepository;
 import co.com.pragma.model.exception.UserNotFoundException;
 import co.com.pragma.r2dbc.exception.InvalidTokenException;
+import co.com.pragma.r2dbc.mapper.UserMapper;
 import org.springframework.security.oauth2.jwt.Jwt;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,11 +20,15 @@ import reactor.core.publisher.Mono;
 public class UserClientConexion implements UserClientRepository {
 
     private final WebClient webClient;
+    private final UserMapper userMapper;
 
-    public UserClientConexion(WebClient.Builder webClient, @Value("${config.base.endpoint.client}") String baseEndpoint) {
+    public UserClientConexion(WebClient.Builder webClient,
+                              @Value("${config.base.endpoint.client}") String baseEndpoint,
+                              UserMapper userMapper) {
         this.webClient = webClient
                 .baseUrl(baseEndpoint)
                 .build();
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -39,7 +45,6 @@ public class UserClientConexion implements UserClientRepository {
                         throw new IllegalStateException("Credenciales inválidas o no se encontró token JWT.");
                     }
                 }) // Extrae token
-
                 .flatMap(token -> webClient
                         .get()
                         .uri("/api/v1/login/{email}", email)
@@ -63,4 +68,34 @@ public class UserClientConexion implements UserClientRepository {
                         .map(ClientResponseDTO::getIdentificationNumber)
                 );
     }
+
+    /*
+    @Override
+    public Mono<String> getIdentificationByEmail(String email) {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> {
+                    Object credentials = ctx.getAuthentication().getCredentials();
+                    if (credentials instanceof Jwt jwt) {
+                        return jwt.getTokenValue();
+                    }
+                    throw new IllegalStateException("Credenciales inválidas o no se encontró token JWT.");
+                })
+                .flatMap(token -> webClient
+                        .get()
+                        .uri("/api/v1/login/{email}", email)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .retrieve()
+                        .onStatus(status -> status.value() == 404,
+                                response -> Mono.error(new UserNotFoundException("The user does not exist")))
+                        .onStatus(status -> status.is5xxServerError(),
+                                response -> response.bodyToMono(String.class).flatMap(body -> {
+                                    if (body.toLowerCase().contains("bad token")) {
+                                        return Mono.error(new InvalidTokenException("Invalid or expired token"));
+                                    }
+                                    return Mono.error(new RuntimeException("Internal server error: " + body));
+                                }))
+                        .bodyToMono(ClientResponseDTO.class)
+                        .map(userMapper::toDomain)
+                );
+    }*/
 }

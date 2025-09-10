@@ -1,10 +1,10 @@
-package co.com.pragma.r2dbc;
+package co.com.pragma.r2dbc.loanType;
 
 import co.com.pragma.model.exception.InvalidLoanTypeException;
 import co.com.pragma.model.loantype.LoanType;
 import co.com.pragma.model.loantype.LoanTypeRepository;
 import co.com.pragma.r2dbc.entity.LoanTypeEntity;
-import co.com.pragma.r2dbc.gateways.LoanTypeReactiveRepository;
+import co.com.pragma.r2dbc.loanType.LoanTypeReactiveRepository;
 import co.com.pragma.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.pragma.r2dbc.mapper.LoanTypeEntityMapper;
 import org.reactivecommons.utils.ObjectMapper;

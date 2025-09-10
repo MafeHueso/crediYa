@@ -33,6 +33,7 @@ routes:
     createLoan: "/api/v1/application"
     findByTypeLoan: "/api/v1/application/{loanTypeId}"
     findByIdentificationAndLoanType: "/api/v1/application/{identification}/{loanTypeId}"
+    pendingLoans: "/api/v1/pending"
 
 jwt:
   secret: "4v+9du6Vl3qZrYfLJe6A2P2QYb3B8FgcpzNEkZw1ySA="

@@ -1,4 +1,4 @@
-package co.com.pragma.api.response;
+package co.com.pragma.api.saveApplication;
 
 import lombok.*;
 

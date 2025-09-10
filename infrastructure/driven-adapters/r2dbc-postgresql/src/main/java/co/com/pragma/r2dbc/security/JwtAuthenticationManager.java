@@ -2,13 +2,14 @@ package co.com.pragma.r2dbc.security;
 
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,19 +31,34 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
         log.info("Token enviado al login service: {}", token);
 
         if (!jwtProvider.validateToken(token)) {
-            return Mono.empty();  // Token inválido, authentication falla
+            return Mono.empty();
         }
 
-        String email = jwtProvider.getEmailFromToken(token); // tu método para obtener email
-        List<String> roles = jwtProvider.getRoles(token); // deberías tener este método para extraer roles
+        return Mono.just(token)
+                .flatMap(t -> {
+                    try {
+                        Claims claims = jwtProvider.getClaims(t);
 
-        List<SimpleGrantedAuthority> authorities = roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+                        List<SimpleGrantedAuthority> authorities = Stream.of(claims.get("roleId"))
+                                .map(role -> (List<Map<String, String>>) role)
+                                .flatMap(roleList -> roleList.stream()
+                                        .map(r -> "ROLE_" + r.get("authority"))
+                                        .map(SimpleGrantedAuthority::new))
+                                .collect(Collectors.toList());
 
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(email, null, authorities);
 
-        return Mono.just(authToken);
+                        Authentication auth = new UsernamePasswordAuthenticationToken(
+                                claims.getSubject(),
+                                null,
+                                authorities
+                        );
+
+                        return Mono.just(auth);
+
+                    } catch (Exception e) {
+                        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad token");
+                    }
+                });
+
     }
 }

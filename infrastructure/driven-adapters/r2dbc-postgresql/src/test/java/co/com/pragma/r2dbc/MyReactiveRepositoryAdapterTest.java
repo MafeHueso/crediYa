@@ -1,6 +1,7 @@
 package co.com.pragma.r2dbc;
 
-import co.com.pragma.r2dbc.gateways.LoanApplicationReactiveRepository;
+import co.com.pragma.r2dbc.loanApplication.LoanApplicationReactiveRepository;
+import co.com.pragma.r2dbc.loanType.LoanTypeReactiveRepositoryAdapter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

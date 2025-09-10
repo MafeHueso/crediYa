@@ -1,4 +1,4 @@
-package co.com.pragma.r2dbc.gateways;
+package co.com.pragma.r2dbc.loanType;
 
 
 import co.com.pragma.r2dbc.entity.LoanTypeEntity;

@@ -5,9 +5,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+@Component
 public class SecurityContextRepository implements ServerSecurityContextRepository {
 
     private final JwtAuthenticationManager jwtAuthenticationManager;
@@ -31,7 +33,6 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
 
         String token = authHeader.substring(7);
 
-        // Autenticar usando JwtAuthenticationManager
         return jwtAuthenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(token, token))
                 .map(SecurityContextImpl::new);

@@ -18,7 +18,7 @@ public class RouterRest {
     private final Handler loanHandler;
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(POST(loanPath.getCreateLoan()), loanHandler::listenSaveLoan);
-               // .andRoute(GET(loanPath.getFindByIdentificationAndLoanType()), loanHandler::listenFindByIdentificationAndLoanType);
+        return route(POST(loanPath.getCreateLoan()), loanHandler::listenSaveLoan)
+               .andRoute(GET(loanPath.getPendingLoans()), loanHandler::listenGetPendingLoanApplications);
     }
 }

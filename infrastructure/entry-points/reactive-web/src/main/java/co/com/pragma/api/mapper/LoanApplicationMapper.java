@@ -1,7 +1,7 @@
 package co.com.pragma.api.mapper;
 
-import co.com.pragma.api.request.LoanApplicationRequestDTO;
-import co.com.pragma.api.response.LoanApplicationResponseDTO;
+import co.com.pragma.api.saveApplication.LoanApplicationRequestDTO;
+import co.com.pragma.api.saveApplication.LoanApplicationResponseDTO;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
