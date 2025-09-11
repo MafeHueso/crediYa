@@ -26,13 +26,21 @@ public class Handler {
         String pageParam = serverRequest.queryParam("page").orElse("0");
         String sizeParam = serverRequest.queryParam("size").orElse("10");
 
-        int statusId = Integer.parseInt(statusIdParam);
-        int page = Integer.parseInt(pageParam);
-        int size = Integer.parseInt(sizeParam);
+        int statusId;
+        int page;
+        int size;
 
+        try {
+            statusId = Integer.parseInt(statusIdParam);
+            page = Integer.parseInt(pageParam);
+            size = Integer.parseInt(sizeParam);
+        } catch (NumberFormatException e) {
+            return ServerResponse.badRequest()
+                    .bodyValue(Collections.singletonMap("error", "Invalid query parameters"));
+        }
         PaginationRequest pageable = new PaginationRequest(page, size);
 
-        return loanUseCase.getPendingLoanApplications(pageable, statusId)
+        return loanUseCase.getLoanApplications(pageable, statusId)
                 .flatMap(response ->
                         ServerResponse.ok()
                                 .contentType(MediaType.APPLICATION_JSON)

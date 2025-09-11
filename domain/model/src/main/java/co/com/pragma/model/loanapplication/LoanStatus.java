@@ -1,4 +1,4 @@
-package co.com.pragma.model;
+package co.com.pragma.model.loanapplication;
 
 public class LoanStatus {
     public static final int PENDING_REVIEW = 1;

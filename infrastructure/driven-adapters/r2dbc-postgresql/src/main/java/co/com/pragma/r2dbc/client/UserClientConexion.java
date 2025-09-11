@@ -32,7 +32,7 @@ public class UserClientConexion implements UserClientRepository {
     }
 
     @Override
-    public Mono<String> getIdentificationByEmail(String email) {
+    public Mono<Long> getIdentificationByEmail(String email) {
         return ReactiveSecurityContextHolder.getContext()
                 .map(ctx -> {
                     Object credentials = ctx.getAuthentication().getCredentials();
@@ -47,7 +47,7 @@ public class UserClientConexion implements UserClientRepository {
                 }) // Extrae token
                 .flatMap(token -> webClient
                         .get()
-                        .uri("/api/v1/login/{email}", email)
+                        .uri("/api/v1/login/email/{email}", email)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token) // Inyecta token
                         .retrieve()
                         .onStatus(
@@ -69,6 +69,16 @@ public class UserClientConexion implements UserClientRepository {
                 );
     }
 
+    public Mono<ClientResponseDTO> getUserInfo(String identificationNumber) {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(ctx -> (Jwt) ctx.getAuthentication().getCredentials())
+                .flatMap(jwt -> webClient.get()
+                        .uri("/api/v1/login/id/{identificationNumber}", identificationNumber)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt.getTokenValue())
+                        .retrieve()
+                        .bodyToMono(ClientResponseDTO.class)
+                );
+    }
     /*
     @Override
     public Mono<String> getIdentificationByEmail(String email) {

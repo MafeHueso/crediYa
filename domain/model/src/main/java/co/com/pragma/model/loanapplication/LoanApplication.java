@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 @Builder
 public record LoanApplication (
  Long applicationId,
- String identificationNumber,
+ Long identificationNumber,
  BigDecimal amount,
  Integer termMonths,
  Integer   statusId,

@@ -4,20 +4,19 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Builder
 public class ClientResponseDTO {
-    private BigDecimal amount;
-    private int termMonths;
+
+    private String firstName;
+    private String lastName;
     private String email;
-    private String name;
-    private String loanTypeId;
-    private BigDecimal interestRate;
-    private String statusId;
-    private String identificationNumber;
+    private Long identificationNumber;
+    private String phoneNumber;
+    private String roleId;
     private BigDecimal salaryBase;
-    private BigDecimal totalMonthlyDebtApprovals;
 }

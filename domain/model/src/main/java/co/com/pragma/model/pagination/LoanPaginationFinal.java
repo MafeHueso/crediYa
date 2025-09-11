@@ -1,8 +1,9 @@
-package co.com.pragma.api.pendingApplicationPagination;
+package co.com.pragma.model.pagination;
 
 import java.math.BigDecimal;
 
-public record PendingLoanResponseDTO(
+public record LoanPaginationFinal (
+
         BigDecimal amount,
         int termMonths,
         String email,
@@ -10,6 +11,7 @@ public record PendingLoanResponseDTO(
         String loanTypeId,
         BigDecimal interestRate,
         String statusId,
-        BigDecimal salaryBase,
-        BigDecimal totalMonthlyDebtApprovals
-) {}
+        BigDecimal salaryBase
+
+
+){}

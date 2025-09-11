@@ -10,7 +10,5 @@ public interface LoanApplicationEntityMapper {
     LoanApplication toModel(LoanApplicationEntity entity);
 
     LoanApplicationEntity toEntity(LoanApplication model);
-    ClientResponseDTO toDto(LoanApplication domain);
-
 
 }

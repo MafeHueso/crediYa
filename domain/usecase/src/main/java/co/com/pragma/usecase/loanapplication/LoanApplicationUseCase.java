@@ -1,11 +1,13 @@
 package co.com.pragma.usecase.loanapplication;
 
-import co.com.pragma.model.LoanStatus;
+import co.com.pragma.model.loanapplication.LoanStatus;
 import co.com.pragma.model.client.UserClientRepository;
 import co.com.pragma.model.exception.*;
 import co.com.pragma.model.loanapplication.LoanApplication;
 import co.com.pragma.model.loanapplication.LoanApplicationRepository;
 import co.com.pragma.model.loantype.LoanTypeRepository;
+import co.com.pragma.model.pagination.LoanJoinPagination;
+import co.com.pragma.model.pagination.LoanPaginationFinal;
 import co.com.pragma.model.pagination.PaginationRequest;
 import co.com.pragma.model.pagination.PaginationResponse;
 import lombok.RequiredArgsConstructor;
@@ -82,8 +84,8 @@ public class LoanApplicationUseCase {
                 .map(saved -> "Pending review");
     }
 
-    public Mono<PaginationResponse<LoanApplication>> getPendingLoanApplications(PaginationRequest request, Integer statusId) {
-        return loanApplicationRepository.getPendingLoanApplications(request, statusId);
+    public Mono<PaginationResponse<LoanPaginationFinal>> getLoanApplications(PaginationRequest paginationRequest, Integer statusId) {
+        return loanApplicationRepository.getPendingLoanApplications(paginationRequest, statusId);
     }
 
     public Mono<BigDecimal> calculateTotalMonthlyDebt(String email) {
@@ -112,4 +114,5 @@ public class LoanApplicationUseCase {
                 )
                 .reduce(BigDecimal.ZERO, BigDecimal::add); // Suma total mensual
     }
+
 }
