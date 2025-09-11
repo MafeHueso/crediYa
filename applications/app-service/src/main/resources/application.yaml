@@ -23,7 +23,8 @@ routes:
     paths:
       signUp: "/api/v1/signUp"
       login: "/api/v1/login"
-      usersByEmail: "/api/v1/login/{email}"
+      usersByEmail: "/api/v1/login/email/{email}"
+      usersByIdentificationNumber: "/api/v1/login/id/{identificationNumber}"
 management:
   endpoints:
     web:

@@ -1,7 +1,7 @@
 package co.com.pragma.usecase.user;
 
-import co.com.pragma.model.user.dto.LogInDTO;
-import co.com.pragma.model.user.dto.TokenDTO;
+import co.com.pragma.model.user.model.LogIn;
+import co.com.pragma.model.user.model.Token;
 import co.com.pragma.model.user.gateways.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,8 +24,8 @@ class LogInUseCaseTest {
 
     @Test
     void shouldReturnTokenWhenLoginIsSuccessful() {
-        LogInDTO dto = new LogInDTO("user@example.com", "password123");
-        TokenDTO expectedToken = new TokenDTO("token_value");
+        LogIn dto = new LogIn("user@example.com", "password123");
+        Token expectedToken = new Token("token_value");
 
         when(userRepository.login(dto)).thenReturn(Mono.just(expectedToken));
 
@@ -38,7 +38,7 @@ class LogInUseCaseTest {
 
     @Test
     void shouldPropagateErrorWhenLoginFails() {
-        LogInDTO dto = new LogInDTO("user@example.com", "wrong_password");
+        LogIn dto = new LogIn("user@example.com", "wrong_password");
         RuntimeException error = new RuntimeException("Bad credentials");
 
         when(userRepository.login(dto)).thenReturn(Mono.error(error));

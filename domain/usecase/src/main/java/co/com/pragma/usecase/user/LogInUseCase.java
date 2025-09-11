@@ -1,7 +1,7 @@
 package co.com.pragma.usecase.user;
 
-import co.com.pragma.model.user.dto.LogInDTO;
-import co.com.pragma.model.user.dto.TokenDTO;
+import co.com.pragma.model.user.model.LogIn;
+import co.com.pragma.model.user.model.Token;
 import co.com.pragma.model.user.gateways.UserRepository;
 import reactor.core.publisher.Mono;
 
@@ -12,7 +12,7 @@ public class LogInUseCase {
         this.userRepository = userRepository;
     }
 
-    public Mono<TokenDTO> login(LogInDTO dto) {
+    public Mono<Token> login(LogIn dto) {
         return userRepository.login(dto);
     }
 }

@@ -2,11 +2,9 @@ package co.com.pragma.api;
 
 
 import co.com.pragma.api.dto.UserDTO;
-import co.com.pragma.api.error.InvalidRolRequestException;
 import co.com.pragma.api.mapper.UserDTOMapper;
-import co.com.pragma.model.user.User;
-import co.com.pragma.model.user.dto.LogInDTO;
-import co.com.pragma.model.user.dto.TokenDTO;
+import co.com.pragma.model.user.model.User;
+import co.com.pragma.model.user.model.LogIn;
 import co.com.pragma.model.user.exception.BadCredentialsException;
 import co.com.pragma.model.user.exception.EmailAlreadyExistsException;
 import co.com.pragma.model.user.exception.EmailNotFoundException;
@@ -38,14 +36,6 @@ public class UserHandler {
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     public Mono<ServerResponse> signUp(ServerRequest request) {
-        String roleId = request.exchange().getAttribute("roleId");
-
-        if (roleId == null || !"ADMIN".equalsIgnoreCase(roleId)) {
-            return ServerResponse.status(HttpStatus.FORBIDDEN)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(Mono.error(new InvalidRolRequestException("Only ADMIN users can create new user accounts.")));
-        }
-
         return request.bodyToMono(UserDTO.class)
                 .flatMap(userDTO -> {
                     var violations = validator.validate(userDTO);
@@ -84,7 +74,7 @@ public class UserHandler {
 
     public Mono<ServerResponse> logIn(ServerRequest request) {
 
-        return request.bodyToMono(LogInDTO.class)
+        return request.bodyToMono(LogIn.class)
                 .flatMap(dto ->
                         logInUseCase.login(dto)
                                 .flatMap(tokenDTO -> ServerResponse.ok()
@@ -111,5 +101,24 @@ public class UserHandler {
                 .doOnError(e -> log.error("[Handler] Error finding user by email", e));
     }
 
+    public Mono<ServerResponse> findByIdentificationNumber(ServerRequest serverRequest) {
+        String identificationNumberParam = serverRequest.pathVariable("identificationNumber");
 
+        Long identificationNumber;
+        try {
+            identificationNumber = Long.parseLong(identificationNumberParam);
+        } catch (NumberFormatException e) {
+            return ServerResponse.badRequest()
+                    .bodyValue(Collections.singletonMap("error", "Invalid identification number format"));
+        }
+
+        return userUseCase.findByIdentificationNumber(identificationNumber)
+                .map(userDTOMapper::toDomain)
+                .flatMap(dto -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(dto))
+                .onErrorResume(IllegalArgumentException.class, error -> ServerResponse.status(HttpStatus.NOT_FOUND)
+                        .bodyValue(Collections.singletonMap("error", error.getMessage())))
+                .doOnError(e -> log.error("Error finding user by identification number", e));
+    }
 }

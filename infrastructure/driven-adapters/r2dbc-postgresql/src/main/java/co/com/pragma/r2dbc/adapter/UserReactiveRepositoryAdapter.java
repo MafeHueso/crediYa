@@ -1,8 +1,8 @@
 package co.com.pragma.r2dbc.adapter;
 
-import co.com.pragma.model.user.User;
-import co.com.pragma.model.user.dto.LogInDTO;
-import co.com.pragma.model.user.dto.TokenDTO;
+import co.com.pragma.model.user.model.User;
+import co.com.pragma.model.user.model.LogIn;
+import co.com.pragma.model.user.model.Token;
 import co.com.pragma.model.user.exception.BadCredentialsException;
 import co.com.pragma.model.user.exception.EmailAlreadyExistsException;
 import co.com.pragma.model.user.gateways.UserRepository;
@@ -47,7 +47,6 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     @Override
     public Mono<User> signUp(User user) {
         UserEntity userEntity = userEntityMapper.toEntity(user);
-
         userEntity.setPassword(passwordEncoder.encode(user.password()));
 
         return userReactiveRepository.findByEmail(user.email())
@@ -62,18 +61,24 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
                 })
                 .as(transactionalOperator::transactional);
     }
-
     @Override
     public Mono<User> findByEmail(String email) {
 
         return userReactiveRepository.findByEmail(email)
                 .map(userEntityMapper::toModel);
     }
+
     @Override
-    public Mono<TokenDTO> login(LogInDTO dto) {
+    public Mono<User> findByIdentificationNumber(Long identificationNumber) {
+
+        return userReactiveRepository.findByIdentificationNumber(identificationNumber)
+                .map(userEntityMapper::toModel);
+    }
+    @Override
+    public Mono<Token> login(LogIn dto) {
         return userReactiveRepository.findByEmail(dto.email())
                 .filter(userDocument -> passwordEncoder.matches(dto.password(), userDocument.getPassword()))
-                .map(userDocument -> new TokenDTO(jwtProvider.generateToken(userDocument)))
+                .map(userDocument -> new Token(jwtProvider.generateToken(userDocument)))
                 .switchIfEmpty(Mono.error(new BadCredentialsException("Bad credentials")));
     }
 }

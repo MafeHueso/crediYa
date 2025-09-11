@@ -2,7 +2,7 @@ package co.com.pragma.r2dbc;
 
 import static org.mockito.Mockito.*;
 
-import co.com.pragma.model.user.User;
+import co.com.pragma.model.user.model.User;
 import co.com.pragma.r2dbc.adapter.UserReactiveRepositoryAdapter;
 import co.com.pragma.r2dbc.entity.UserEntity;
 import co.com.pragma.r2dbc.gateway.UserReactiveRepository;

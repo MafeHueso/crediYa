@@ -1,7 +1,7 @@
 package co.com.pragma.usecase.user;
 
 
-import co.com.pragma.model.user.User;
+import co.com.pragma.model.user.model.User;
 import co.com.pragma.model.user.exception.EmailAlreadyExistsException;
 import co.com.pragma.model.user.exception.EmailNotFoundException;
 import co.com.pragma.model.user.gateways.UserRepository;
@@ -38,6 +38,12 @@ public class UserUseCase {
 
         return userRepository.findByEmail(email)
                 .switchIfEmpty(Mono.error(new EmailNotFoundException("Unregistered email")));
+    }
+
+    public Mono<User> findByIdentificationNumber(Long identificationNumber) {
+
+        return userRepository.findByIdentificationNumber(identificationNumber)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("Unregistered identification number")));
     }
 
 }

@@ -13,8 +13,6 @@ import java.time.LocalDate;
 @Builder
 public class UserDTO{
 
-    private Long user_id;
-
     @NotNull
     @NotBlank(message = "Field firstname cannot be null or empty")
     private String firstName;

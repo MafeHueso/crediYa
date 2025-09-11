@@ -11,4 +11,5 @@ public class LoginPath {
     private String login;
     private String signUp;
     private String usersByEmail;
+    private String usersByIdentificationNumber;
 }

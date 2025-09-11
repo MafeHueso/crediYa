@@ -20,7 +20,9 @@ public class UserRouterRest {
     public RouterFunction<ServerResponse> loginFunction(UserHandler handler) {
         return route(POST(loginPath.getSignUp()), userHandler::signUp)
                 .andRoute(POST(loginPath.getLogin()), userHandler::logIn)
-                .andRoute(GET(loginPath.getUsersByEmail()), userHandler::findByEmail);
+                .andRoute(GET(loginPath.getUsersByEmail()), userHandler::findByEmail)
+                .andRoute(GET(loginPath.getUsersByIdentificationNumber()), userHandler::findByIdentificationNumber);
+
     }
 }
 

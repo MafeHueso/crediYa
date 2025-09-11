@@ -1,4 +1,4 @@
-package co.com.pragma.model.user;
+package co.com.pragma.model.user.model;
 
 public enum Role {
     ROLE_ADMIN,
